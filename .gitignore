@@ -1,0 +1,95 @@
+# =====================================================================
+# C# and .NET Core / .NET Framework .gitignore
+# 來源：GitHub's 官方 .NET template
+# =====================================================================
+
+## Build artifacts (編譯產物)
+# ---------------------------------------------------------------------
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Tt]emp/
+*.pdb
+*.suo
+*.user
+*.userosscache
+*.ncb
+*.resource
+*.aps
+*.bak
+*.vspscc
+*.vssscc
+*.tmp
+*.log
+
+# C# 10/11 的檔案作用域命名空間相關
+**/project.razor.json
+**/editorconfig.json
+
+## Packages (NuGet Packages)
+# ---------------------------------------------------------------------
+# NuGet 套件緩存目錄，不應提交
+[Pp]ackages/
+# 套件還原鎖定檔案（如果使用 PackageReference 則通常不用忽略）
+# 如果使用 packages.config 方式管理套件，則忽略
+# project.assets.json 應被忽略，因為它是自動生成並用於還原
+project.assets.json
+# NuGet 快取檔案
+*.nupkg
+*.snk
+
+## Visual Studio / IDE (IDE 和工具檔案)
+# ---------------------------------------------------------------------
+.vs/ # Visual Studio 2017/2019/2022 的隱藏資料夾
+*.v1[0-7].suo
+*.sdf
+*.opensdf
+*.docstates
+
+# Rider/JetBrains IDE 專案設定檔
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Visual Studio Code 設定
+.vscode/
+
+## Test Results (測試結果)
+# ---------------------------------------------------------------------
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.testsettings
+*.vsmdi
+*.coverage
+*.coveragexml
+
+## ASP.NET Core / Web (網站開發相關)
+# ---------------------------------------------------------------------
+# 用於本機設定檔，包含連接字串等機敏資訊
+appsettings.Development.json
+appsettings.Staging.json
+appsettings.Production.json
+appsettings.Local.json
+appsettings.*.json # 通常建議只忽略包含密碼的開發/本地版本
+appsettings.json.user
+
+# 靜態資源的編譯輸出目錄
+wwwroot/
+
+# 部署發佈相關
+**/publish/
+**/Publish/
+**/Deployment/
+
+## Third Party Tools (第三方工具)
+# ---------------------------------------------------------------------
+# ReSharper / CodeRush 等工具檔案
+*.resharper
+*.dotSettings
+_ReSharper.*/
+
+# Git 版本控制忽略
+.gitattributes
