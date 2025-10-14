@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using AppointmentSystem.Models;
 
 namespace AppointmentSystem.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -15,6 +16,24 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasOne(u => u.Customer)
+                .WithOne()
+                .HasForeignKey<User>(u => u.CustomerId)
+                .IsRequired(false) 
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasOne(u => u.Merchant)
+                .WithOne()
+                .HasForeignKey<User>(u => u.MerchantId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    
         modelBuilder.Entity<Merchant>().HasKey(m => m.Id);
 
         modelBuilder.Entity<Customer>().HasKey(c => c.Id);
