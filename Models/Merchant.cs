@@ -11,6 +11,7 @@ public class Merchant
     public string Address { get; set; } = string.Empty;
     public string Introduction { get; set; } = string.Empty;
     public ICollection<Service> Services { get; set; } = new List<Service>();
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     public ICollection<AvailableTime> AvailableTimes { get; set; } = new List<AvailableTime>();
 }
 

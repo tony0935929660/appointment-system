@@ -7,6 +7,7 @@ namespace AppointmentSystem.Models;
 
 public class Appointment
 {
+    public int Id { get; set; }
     public required int MerchantId { get; set; }
     public required int CustomerId { get; set; }
     public required int ServiceId { get; set; }

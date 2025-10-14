@@ -12,4 +12,5 @@ public class Customer
     public string Password { get; set; } = string.Empty;
     public required string LineId { get; set; }
     public string CellPhone { get; set; } = string.Empty;
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 }
