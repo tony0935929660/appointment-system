@@ -14,4 +14,3 @@ public class Merchant
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     public ICollection<AvailableTime> AvailableTimes { get; set; } = new List<AvailableTime>();
 }
-

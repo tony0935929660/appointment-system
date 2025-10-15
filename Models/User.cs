@@ -8,7 +8,7 @@ namespace AppointmentSystem.Models;
 
 public class User : IdentityUser
 {
-    public required string LineId { get; set; }
+    public string? LineId { get; set; }
     public int? CustomerId { get; set; }
     public Customer? Customer { get; set; }
     public int? MerchantId { get; set; }
