@@ -16,77 +16,95 @@ public class AuthController : ControllerBase
     private readonly SignInManager<User> _signInManager;
     private readonly AppDbContext _dbContext;
     private readonly JwtService _jwtService;
+    private readonly LineService _lineService;
+    private readonly CustomerService _customerService;
+    private readonly MerchantService _merchantService;
 
     public AuthController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         AppDbContext dbContext,
-        JwtService jwtService
+        JwtService jwtService,
+        LineService lineService,
+        CustomerService customerService,
+        MerchantService merchantService
     )
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _dbContext = dbContext;
         _jwtService = jwtService;
+        _lineService = lineService;
+        _customerService = customerService;
+        _merchantService = merchantService;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null)
-        {
-            return Unauthorized("Invalid email or password.");
-        }
+        var lineProfile = await _lineService.GetLineProfileAsync(request.LineAccessToken);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.LineId == lineProfile.UserId);
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-        if (!result.Succeeded)
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            return Unauthorized("Invalid email or password.");
-        }
+            if (user != null)
+            {
+                if (request.Type == UserType.Merchant && user.MerchantId == null)
+                {
+                    await _merchantService.CreateMerchantByUserAndNameAsync(user, lineProfile.DisplayName);
+                    
+                }
+                else if (request.Type == UserType.Customer && user.CustomerId == null)
+                {
+                    await _customerService.CreateCustomerByUserAndNameAsync(user, lineProfile.DisplayName);
+                }
 
-        return Ok(new { Token = _jwtService.GenerateJwtToken(user) });
+                await transaction.CommitAsync();
+                return Ok(new { Token = _jwtService.GenerateJwtToken(user) });
+            }
+
+            var newUser = new User
+            {
+                UserName = lineProfile.UserId,
+                LineId = lineProfile.UserId,
+            };
+
+            var result = await _userManager.CreateAsync(newUser);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            if (request.Type == UserType.Merchant)
+            {
+                await _merchantService.CreateMerchantByUserAndNameAsync(newUser, lineProfile.DisplayName);
+            }
+            else if (request.Type == UserType.Customer)
+            {
+                await _customerService.CreateCustomerByUserAndNameAsync(newUser, lineProfile.DisplayName);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Ok(new { Token = _jwtService.GenerateJwtToken(newUser) });
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            return BadRequest("Registration or login failed. Please try again.");
+        }
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
     {
-        if (request.Password != request.ConfirmPassword)
-        {
-            return BadRequest("Passwords do not match.");
-        }
-
-        var existingUser = await _userManager.FindByEmailAsync(request.Email);
-        if (existingUser != null)
-        {
-            return BadRequest("Email is already registered.");
-        }
-
-        var user = new User
-        {
-            UserName = request.Email,
-            Email = request.Email,
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
-
+        await _signInManager.SignOutAsync();
         return Ok();
     }
 
-    [HttpPost("login/line")]
-    public async Task<IActionResult> LineLogin([FromBody] string lineId)
-    {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.LineId == lineId);
-        if (user == null)
-        {
-            user = new User { LineId = lineId };
-            await _userManager.CreateAsync(user);
-        }
-
-        return Ok(new { Token = _jwtService.GenerateJwtToken(user) });
-    }
+    //TODO: Refresh Token
+    //TODO: Email Verification
+    //TODO: Password Reset
 }

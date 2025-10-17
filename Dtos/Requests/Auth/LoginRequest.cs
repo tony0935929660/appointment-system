@@ -7,6 +7,12 @@ namespace AppointmentSystem.Dtos.Requests.Auth;
 
 public class LoginRequest
 {
-    public required string Email { get; set; }
-    public required string Password { get; set; }
+    public required string LineAccessToken { get; set; }
+    public required UserType Type { get; set; }
+}
+
+public enum UserType
+{
+    Merchant,
+    Customer
 }
