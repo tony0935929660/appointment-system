@@ -12,6 +12,7 @@ namespace AppointmentSystem.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    private readonly ILogger<AuthController> _logger;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly AppDbContext _dbContext;
@@ -21,6 +22,7 @@ public class AuthController : ControllerBase
     private readonly MerchantService _merchantService;
 
     public AuthController(
+        ILogger<AuthController> logger,
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         AppDbContext dbContext,
@@ -30,6 +32,7 @@ public class AuthController : ControllerBase
         MerchantService merchantService
     )
     {
+        _logger = logger;
         _userManager = userManager;
         _signInManager = signInManager;
         _dbContext = dbContext;
@@ -44,7 +47,6 @@ public class AuthController : ControllerBase
     {
         var lineProfile = await _lineService.GetLineProfileAsync(request.LineAccessToken);
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.LineId == lineProfile.UserId);
-
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
@@ -90,9 +92,10 @@ public class AuthController : ControllerBase
 
             return Ok(new { Token = _jwtService.GenerateJwtToken(newUser) });
         }
-        catch
+        catch (Exception exception)
         {
             await transaction.RollbackAsync();
+            _logger.LogError(exception, "Login failed for user: {UserId}", user?.Id);
             return BadRequest("Registration or login failed. Please try again.");
         }
     }

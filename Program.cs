@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using AppointmentSystem.Data;
-using AppointmentSystem.Models;
-using AppointmentSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using AppointmentSystem.Data;
+using AppointmentSystem.Models;
+using AppointmentSystem.Services;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,13 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<LineService>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<MerchantService>();
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

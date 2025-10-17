@@ -93,3 +93,7 @@ _ReSharper.*/
 
 # Git 版本控制忽略
 .gitattributes
+
+Logs/
+logs/
+*.log
